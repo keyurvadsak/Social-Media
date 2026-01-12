@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from app import models
 from app.database.database import engine
 from app import models
-from app.routers import auth,Post,Profile,Likes,Comments
+from app.routers import auth,Post,Profile,Likes,Comments,Followers
 # from fastapi import Request
 # import time
 # from fastapi.middleware.cors import CORSMiddleware
@@ -35,6 +35,7 @@ app.include_router(Post.router)
 app.include_router(Profile.router)
 app.include_router(Likes.router)
 app.include_router(Comments.router)
+app.include_router(Followers.router)
 
 
 
