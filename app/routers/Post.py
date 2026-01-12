@@ -1,4 +1,4 @@
-from fastapi import APIRouter,Depends,status,HTTPException
+from fastapi import APIRouter,Depends,status,HTTPException,BackgroundTasks
 from app.database.database import get_db
 from sqlalchemy.orm import Session
 from .Oauth2 import get_current_user
@@ -8,6 +8,8 @@ from fastapi import Request,File,UploadFile,Form
 from typing import List
 from app.schemas.Post import Post_Response,Update_Post
 import base64
+from app.routers.email_sends import send_email
+from app.schemas.email import Email_Send
 
 
 router = APIRouter(
@@ -31,7 +33,7 @@ def get_user_post(request:Request,db:Session = Depends(get_db),current_user = De
     
 
 @router.post("/",response_model=Post_Response)
-async def create_user_post(text:str = Form(...),caption:str = Form(...),file:UploadFile = File(...),db:Session = Depends(get_db),current_user = Depends(get_current_user)):
+async def create_user_post(backgroundTask : BackgroundTasks,text:str = Form(...),caption:str = Form(...),file:UploadFile = File(...),db:Session = Depends(get_db),current_user = Depends(get_current_user)):
     if(file == None):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail="file not found")
     data = await file.read()
@@ -40,6 +42,8 @@ async def create_user_post(text:str = Form(...),caption:str = Form(...),file:Upl
     db.add(new_post)
     db.commit()
     db.refresh(new_post)
+    email_body = Email_Send(to_email = current_user.email,subject = "Post Created Sucessfully.",body = f"<h1>Your post has been created!</h1><p><b>Text:</b>{new_post.text}</p><p><b>Content:</b>{new_post.caption}</p>")
+    backgroundTask.add_task(send_email,email_body)
     return new_post
 
 @router.put("/{id}",response_model=Post_Response)

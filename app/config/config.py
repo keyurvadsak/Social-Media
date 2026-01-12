@@ -10,6 +10,13 @@ class Settings(BaseSettings):
     algorithm:str
     access_token_expire_minutes:int
     
+    
+    mail_username:str
+    mail_password:str
+    mail_port:int
+    mail_from:str
+    mail_server:str
+    
     class Config:
         env_file = ".env"
         

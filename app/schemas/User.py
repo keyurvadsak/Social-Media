@@ -30,5 +30,6 @@ class UserOut(BaseModel):
     
     class Config:
         orm_mode:True
-    
+        
+
 
